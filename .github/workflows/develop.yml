@@ -34,16 +34,9 @@ jobs:
         run: npm run build
 
   deploy:
-    name: Deploy to server (develop)
-    needs: build
+    name: Deploy app with pm2
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/develop'
     steps:
-      - name: Setup SSH agent
-        uses: webfactory/ssh-agent@v0.5.3
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
       - name: Deploy app with pm2
         env:
           SERVER_USER: ${{ secrets.SERVER_USER }}
@@ -61,5 +54,7 @@ jobs:
             npm ci --production
             npm run build
 
-            pm2 restart "$PM2_NAME" || pm2 start dist/main.js --name "$PM2_NAME"
+            export $(cat development.env | xargs)
+
+            pm2 restart "$PM2_NAME" --update-env || pm2 start dist/main.js --name "$PM2_NAME"
           SSH
