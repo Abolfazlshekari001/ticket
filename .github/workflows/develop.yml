@@ -55,7 +55,8 @@ jobs:
           SERVER_USER: ${{ secrets.SERVER_USER }}
           SERVER_HOST: ${{ secrets.SERVER_HOST }}
         run: |
-          ssh -o ConnectTimeout=10 $SERVER_USER@$SERVER_HOST 'echo "SSH connection successful"'
+          echo "Testing SSH connection..."
+          ssh -o ConnectTimeout=10 -o BatchMode=yes $SERVER_USER@$SERVER_HOST 'echo "SSH connection successful - User: $(whoami), Host: $(hostname)"'
 
       - name: Deploy app with pm2
         env:
@@ -68,12 +69,22 @@ jobs:
             set -e
             echo "Starting deployment process..."
             
+            # Navigate to project directory
+            echo "Navigating to: $SERVER_PATH"
             cd "$SERVER_PATH"
-            echo "Changed to directory: $(pwd)"
+            echo "Current directory: $(pwd)"
+            
+            # Verify it's a git repository
+            if [ ! -d ".git" ]; then
+              echo "Error: Not a git repository in $(pwd)"
+              ls -la
+              exit 1
+            fi
 
             echo "Fetching latest changes..."
             git fetch --all
             git reset --hard origin/develop
+            git status
 
             echo "Installing dependencies..."
             npm ci --production
@@ -82,12 +93,31 @@ jobs:
             npm run build
 
             echo "Loading environment variables..."
-            set -a
-            source development.env
-            set +a
+            if [ -f "development.env" ]; then
+              set -a
+              source development.env
+              set +a
+              echo "Environment variables loaded from development.env"
+            else
+              echo "Warning: development.env file not found in $(pwd)"
+              ls -la *.env 2>/dev/null || echo "No .env files found"
+            fi
 
-            echo "Restarting PM2 application..."
-            pm2 restart "$PM2_NAME" --update-env || pm2 start dist/main.js --name "$PM2_NAME" --env-file development.env
+            echo "Managing PM2 application..."
+            # Check if PM2 process exists
+            if pm2 describe "$PM2_NAME" > /dev/null 2>&1; then
+              echo "Restarting existing PM2 process: $PM2_NAME"
+              pm2 restart "$PM2_NAME" --update-env
+            else
+              echo "Starting new PM2 process: $PM2_NAME"
+              if [ -f "development.env" ]; then
+                pm2 start dist/main.js --name "$PM2_NAME" --env-file development.env
+              else
+                pm2 start dist/main.js --name "$PM2_NAME"
+              fi
+            fi
             
             echo "Deployment completed successfully!"
+            echo "PM2 Status:"
+            pm2 status
           SSH
