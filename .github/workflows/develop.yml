@@ -77,6 +77,34 @@ jobs:
             cd "\$SERVER_PATH"
             echo "Current directory: \$(pwd)"
             
+            # Setup NVM environment
+            export NVM_DIR="\$HOME/.nvm"
+            [ -s "\$NVM_DIR/nvm.sh" ] && source "\$NVM_DIR/nvm.sh"
+            
+            # Set specific paths based on your server setup
+            NODE_PATH="/root/.nvm/versions/node/v18.20.4/bin/node"
+            NPM_PATH="/root/.nvm/versions/node/v18.20.4/bin/npm"
+            PM2_PATH="/root/.nvm/versions/node/v18.20.4/bin/pm2"
+            
+            # Verify tools exist
+            if [ ! -f "\$NODE_PATH" ]; then
+              echo "Error: Node.js not found at \$NODE_PATH"
+              # Fallback search
+              NODE_PATH=\$(find \$HOME/.nvm -name "node" -type f 2>/dev/null | head -1)
+              echo "Fallback Node.js path: \$NODE_PATH"
+            fi
+            
+            if [ ! -f "\$NPM_PATH" ]; then
+              echo "Error: npm not found at \$NPM_PATH"
+              NPM_PATH=\$(find \$HOME/.nvm -name "npm" -type f 2>/dev/null | head -1)
+              echo "Fallback npm path: \$NPM_PATH"
+            fi
+            
+            echo "Using Node.js: \$NODE_PATH"
+            echo "Using npm: \$NPM_PATH"
+            echo "Node.js version: \$(\$NODE_PATH --version)"
+            echo "NPM version: \$(\$NPM_PATH --version)"
+            
             # Verify it's a git repository
             if [ ! -d ".git" ]; then
               echo "Error: Not a git repository in \$(pwd)"
@@ -90,10 +118,10 @@ jobs:
             git status
 
             echo "Installing dependencies..."
-            npm ci --production
+            \$NPM_PATH ci --production
             
             echo "Building project..."
-            npm run build
+            \$NPM_PATH run build
 
             echo "Loading environment variables..."
             if [ -f "development.env" ]; then
@@ -107,20 +135,34 @@ jobs:
             fi
 
             echo "Managing PM2 application..."
+            
+            # Check PM2 path
+            if [ ! -f "\$PM2_PATH" ]; then
+              echo "PM2 not found at \$PM2_PATH, searching..."
+              PM2_PATH=\$(find \$HOME/.nvm -name "pm2" -type f 2>/dev/null | head -1)
+              if [ -z "\$PM2_PATH" ]; then
+                echo "Installing PM2..."
+                \$NPM_PATH install -g pm2
+                PM2_PATH=\$(find \$HOME/.nvm -name "pm2" -type f 2>/dev/null | head -1)
+              fi
+            fi
+            
+            echo "Using PM2: \$PM2_PATH"
+            
             # Check if PM2 process exists
-            if pm2 describe "\$PM2_NAME" > /dev/null 2>&1; then
+            if \$PM2_PATH describe "\$PM2_NAME" > /dev/null 2>&1; then
               echo "Restarting existing PM2 process: \$PM2_NAME"
-              pm2 restart "\$PM2_NAME" --update-env
+              \$PM2_PATH restart "\$PM2_NAME" --update-env
             else
               echo "Starting new PM2 process: \$PM2_NAME"
               if [ -f "development.env" ]; then
-                pm2 start dist/main.js --name "\$PM2_NAME" --env-file development.env
+                \$PM2_PATH start dist/main.js --name "\$PM2_NAME" --env-file development.env
               else
-                pm2 start dist/main.js --name "\$PM2_NAME"
+                \$PM2_PATH start dist/main.js --name "\$PM2_NAME"
               fi
             fi
             
             echo "Deployment completed successfully!"
             echo "PM2 Status:"
-            pm2 status
+            \$PM2_PATH status
           EOF
