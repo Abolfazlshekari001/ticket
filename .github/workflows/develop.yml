@@ -32,9 +32,31 @@ jobs:
 
   deploy:
     name: Deploy app with pm2
-    needs: build  
+    needs: build
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.7.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Add server to known hosts
+        env:
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H $SERVER_HOST >> ~/.ssh/known_hosts
+
+      - name: Test SSH Connection
+        env:
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+        run: |
+          ssh -o ConnectTimeout=10 $SERVER_USER@$SERVER_HOST 'echo "SSH connection successful"'
+
       - name: Deploy app with pm2
         env:
           SERVER_USER: ${{ secrets.SERVER_USER }}
@@ -42,19 +64,30 @@ jobs:
           SERVER_PATH: ${{ secrets.SERVER_PATH }}
           PM2_NAME: ${{ secrets.PM2_NAME }}
         run: |
-          ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_HOST << SSH
+          ssh $SERVER_USER@$SERVER_HOST << 'SSH'
             set -e
+            echo "Starting deployment process..."
+            
             cd "$SERVER_PATH"
+            echo "Changed to directory: $(pwd)"
 
+            echo "Fetching latest changes..."
             git fetch --all
             git reset --hard origin/develop
 
+            echo "Installing dependencies..."
             npm ci --production
+            
+            echo "Building project..."
             npm run build
 
+            echo "Loading environment variables..."
             set -a
             source development.env
             set +a
 
-            pm2 restart "$PM2_NAME" --update-env || pm2 start dist/main.js --name "$PM2_NAME"
+            echo "Restarting PM2 application..."
+            pm2 restart "$PM2_NAME" --update-env || pm2 start dist/main.js --name "$PM2_NAME" --env-file development.env
+            
+            echo "Deployment completed successfully!"
           SSH
