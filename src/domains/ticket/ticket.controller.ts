@@ -30,7 +30,7 @@ export class TicketController {
         private readonly commandBus: CommandBus,
         private readonly queryBus: QueryBus,
     ) {}
-    // ------------------------- ticket registration ----------------------------------
+    // ------------------------- ticket  ----------------------------------
     @UseGuards(JwtAuthGuard)
     @Post('ticketRegistration')
     @ApiOperation({
