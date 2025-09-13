@@ -8,16 +8,16 @@ import { SystemService } from 'src/domains/system/system.service';
 export class GetSystemQueryHandler implements IQueryHandler<GetSystemQuery> {
     constructor(private readonly systemService: SystemService) {}
     async execute(query: GetSystemQuery): Promise<any> {
-        const { audience} = query.req.user;
+        const { audience } = query.req.user;
         try {
-           const exitSystem = await this.systemService.findFullDataSystem(audience);
+            const exitSystem = await this.systemService.findFullDataSystem(audience);
 
             if (!exitSystem) {
                 const Err = Invalid_Input('این سامانه موجود نیست', 'this  system not exist');
                 throw new HttpException(Err, Err.status_code);
             }
-            delete exitSystem['userName']
-            delete exitSystem['password']
+            delete exitSystem['userName'];
+            delete exitSystem['password'];
             return exitSystem;
         } catch (error) {
             if (error.status === undefined) {

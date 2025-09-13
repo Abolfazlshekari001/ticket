@@ -43,7 +43,7 @@ export class DeleteSystemCommandHandler implements ICommandHandler<DeleteSystemC
                 subsystem.deletedAt = new Date();
                 await this.subSystemRepository.save(subsystem);
             }
-            
+
             return system;
         } catch (error) {
             if (error.status === undefined) {

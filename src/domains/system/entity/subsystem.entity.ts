@@ -14,7 +14,6 @@ import {
 } from 'typeorm';
 import { SystemEntity } from './system.entity';
 
-
 @Entity('subSystem')
 export class SubSystemEntity extends BaseEntity {
     @ApiProperty()
@@ -22,7 +21,7 @@ export class SubSystemEntity extends BaseEntity {
     id: string;
 
     @ApiProperty()
-    @Column({ nullable: false })    
+    @Column({ nullable: false })
     name: string;
 
     @ApiProperty()
@@ -48,5 +47,5 @@ export class SubSystemEntity extends BaseEntity {
 
     @ApiProperty()
     @Column({ nullable: true })
-    apiKey: string
+    apiKey: string;
 }

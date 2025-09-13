@@ -25,7 +25,7 @@ export const QueriesHandlers = [
     GetSubSystemToSystemQueryHandler,
     GetAllDepartemantQueryHandler,
     DeleteSubSystemsToSystemCommandHandler,
-    GetAllDepartemantSystemQueryHandler
+    GetAllDepartemantSystemQueryHandler,
 ];
 export const CommandHandlers = [
     AddSystemCommandHandler,
@@ -46,7 +46,7 @@ export const CommandHandlers = [
         }),
     ],
     controllers: [SystemController],
-    providers: [SystemService,JwtStrategy, ...CommandHandlers, ...QueriesHandlers],
+    providers: [SystemService, JwtStrategy, ...CommandHandlers, ...QueriesHandlers],
     exports: [SystemService, ...CommandHandlers, ...QueriesHandlers],
 })
 export class SystemModule {}

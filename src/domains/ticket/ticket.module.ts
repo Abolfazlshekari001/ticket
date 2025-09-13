@@ -22,39 +22,24 @@ import { GetSubmittedSubSystemTicketsQueryHandler } from './cqrs/querys/get-subm
 import { GetTicketsForUserQueryHandler } from './cqrs/querys/get-tickets-user/get-tickets-user-query-handler';
 
 export const QueriesHandlers = [
-  GetAllMessageForTicketQueryHandler,
-  GetAllTicketForUserQueryHandler,
-  GetAllTicketsWithoutOperatorQueryHandler,
-  getAllTicketQueryHandler,
-  getOperatorTicketsQueryHandler,
-  GetSubmittedSubSystemTicketsQueryHandler,
-  GetTicketsForUserQueryHandler
-
+    GetAllMessageForTicketQueryHandler,
+    GetAllTicketForUserQueryHandler,
+    GetAllTicketsWithoutOperatorQueryHandler,
+    getAllTicketQueryHandler,
+    getOperatorTicketsQueryHandler,
+    GetSubmittedSubSystemTicketsQueryHandler,
+    GetTicketsForUserQueryHandler,
 ];
 export const CommandHandlers = [
-  SendMessageOperatorCommandHanler,
-  TicketRegistrationCommandHandler,
-  SendMessageUserCommandHanler,
-  ChengeStatusTicketCommandHanler
+    SendMessageOperatorCommandHanler,
+    TicketRegistrationCommandHandler,
+    SendMessageUserCommandHanler,
+    ChengeStatusTicketCommandHanler,
 ];
 @Module({
-  imports: [CqrsModule, SystemModule, TypeOrmModule.forFeature([SystemEntity, TicketEntity, MessageEntity, DepartmentEntity])],
-  controllers: [TicketController],
-  providers: [TicketService, JwtStrategy, ...CommandHandlers, ...QueriesHandlers],
-  exports: [TicketService, ...CommandHandlers, ...QueriesHandlers],
+    imports: [CqrsModule, SystemModule, TypeOrmModule.forFeature([SystemEntity, TicketEntity, MessageEntity, DepartmentEntity])],
+    controllers: [TicketController],
+    providers: [TicketService, JwtStrategy, ...CommandHandlers, ...QueriesHandlers],
+    exports: [TicketService, ...CommandHandlers, ...QueriesHandlers],
 })
-export class TicketModule { }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+export class TicketModule {}

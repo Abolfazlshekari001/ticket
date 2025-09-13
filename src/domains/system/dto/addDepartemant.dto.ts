@@ -9,11 +9,10 @@ export class addDepartemanSubmitDto {
     @IsString()
     @IsNotEmpty({ message: 'Title should not be empty' })
     title: string;
-
 }
 
 export class addDepartemanResponseDto {
-    @ApiProperty()addDepartemanResponseDto
+    @ApiProperty() addDepartemanResponseDto;
     success: boolean;
     @ApiProperty()
     result;

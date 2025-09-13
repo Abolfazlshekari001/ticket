@@ -43,7 +43,7 @@ export class DepartmentEntity extends BaseEntity {
 
     @Column()
     relatedId: string;
-    
+
     @Column({
         type: 'enum',
         enum: sectionTypeEnum,

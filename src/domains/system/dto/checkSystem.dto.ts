@@ -1,5 +1,5 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { MinLength, MaxLength } from "class-validator";
+import { ApiProperty } from '@nestjs/swagger';
+import { MinLength, MaxLength } from 'class-validator';
 
 export class checkSystemSubmitDto {
     @ApiProperty()
@@ -11,8 +11,6 @@ export class checkSystemSubmitDto {
     @MinLength(5)
     @MaxLength(50)
     userName: string;
-
-
 }
 
 export class checkSystemResponseDto {

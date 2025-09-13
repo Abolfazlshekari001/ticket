@@ -10,10 +10,10 @@ export class SystemEntity extends BaseEntity {
     @ApiProperty()
     @Column({ nullable: false, unique: true })
     userName: string;
-    
+
     @ApiProperty()
     @Column({ nullable: false, unique: true })
-    systemName:string
+    systemName: string;
 
     @ApiProperty()
     @Column({ nullable: false })
@@ -36,5 +36,5 @@ export class SystemEntity extends BaseEntity {
 
     @ApiProperty()
     @Column({ nullable: true })
-    apiKey: string
+    apiKey: string;
 }

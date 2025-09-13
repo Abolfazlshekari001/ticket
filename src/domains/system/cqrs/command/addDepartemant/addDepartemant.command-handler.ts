@@ -39,7 +39,7 @@ export class AddDepartemantCommandHandler implements ICommandHandler<AddDepartem
                     throw new HttpException(Err, Err.status_code);
                 }
             }
-            let departemant = new DepartmentEntity();
+            const departemant = new DepartmentEntity();
             departemant.tite = title;
             departemant.relatedId = owner.id;
             departemant.relatedType = relatedType;

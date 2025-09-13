@@ -175,15 +175,15 @@ export class SystemController {
         const result = await this.queryBus.execute(new GetAllDepartemantQuery(req, sectionType));
         return result;
     }
-        // ------------------------- get departemant for system ----------------------------------
-        @UseGuards(JwtAuthGuard)
-        @Get('get/allDepartemant-system')
-        @ApiOperation({
-            summary: 'get all departemant',
-            description: 'get all departemant for a Sytsem',
-        })
-        async getSystemDepartemant(@Req() req,): Promise<any> {
-            const result = await this.queryBus.execute(new GetAllDepartemantSystemQuery(req));
-            return result;
-        }
+    // ------------------------- get departemant for system ----------------------------------
+    @UseGuards(JwtAuthGuard)
+    @Get('get/allDepartemant-system')
+    @ApiOperation({
+        summary: 'get all departemant',
+        description: 'get all departemant for a Sytsem',
+    })
+    async getSystemDepartemant(@Req() req): Promise<any> {
+        const result = await this.queryBus.execute(new GetAllDepartemantSystemQuery(req));
+        return result;
+    }
 }

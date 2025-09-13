@@ -19,7 +19,7 @@ export class AddSystemCommandHandler implements ICommandHandler<AddSystemCommand
     ) {}
     async execute(command: AddSystemCommand): Promise<any> {
         const { userName, password, systemName, adminId } = command.body;
-        
+
         try {
             const exsitSystem = await this.systemService.findSystemByUsername(userName);
             if (exsitSystem) {
@@ -31,7 +31,7 @@ export class AddSystemCommandHandler implements ICommandHandler<AddSystemCommand
             await queryRunner.connect();
             await queryRunner.startTransaction();
             try {
-                let system = new SystemEntity();
+                const system = new SystemEntity();
                 system.userName = userName;
                 system.password = password;
                 system.systemName = systemName;
@@ -45,11 +45,11 @@ export class AddSystemCommandHandler implements ICommandHandler<AddSystemCommand
                     sub: '',
                     section: 'system',
                 };
-                const apiKey = await this.jwtService.sign(payload,  {expiresIn: '100y'},);
-                res.apiKey = apiKey
+                const apiKey = await this.jwtService.sign(payload, { expiresIn: '100y' });
+                res.apiKey = apiKey;
                 await queryRunner.manager.save(res);
 
-                let agent = new AgentsEntity();
+                const agent = new AgentsEntity();
                 agent.agentId = adminId;
                 agent.role = Role.ADMIN;
                 agent.relatedId = system.id;

@@ -11,7 +11,7 @@ export class GetAllDepartemantQueryHandler implements IQueryHandler<GetAllDepart
     async execute(query: GetAllDepartemantQuery): Promise<any> {
         const { sectionType } = query;
         const { audience } = query.req.user;
-        let departemants    
+        let departemants;
         try {
             const exitSubSystem = await this.systemService.findSubsystem(audience);
             if (!exitSubSystem) {
@@ -30,9 +30,9 @@ export class GetAllDepartemantQueryHandler implements IQueryHandler<GetAllDepart
                     const Err = Data_NotFound('دپارتمانی برای این زیرسامانه ثبت نشده', 'Department is not registered for this system');
                     throw new HttpException(Err, Err.status_code);
                 }
-            }else{
+            } else {
                 const Err = Invalid_Input('بخش وارد شده نادرست است', 'The field entered is incorrect');
-                    throw new HttpException(Err, Err.status_code);
+                throw new HttpException(Err, Err.status_code);
             }
 
             return departemants;

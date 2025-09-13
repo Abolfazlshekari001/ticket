@@ -30,7 +30,6 @@ export class TicketRegistrationSubmitDto {
     body: string;
 
     @ApiProperty()
-
     @IsOptional()
     userId: string;
 

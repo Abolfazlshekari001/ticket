@@ -20,7 +20,7 @@ export class AddSubSystemCommandHandler implements ICommandHandler<AddSubSystemC
     ) {}
     async execute(command: AddSubSystemCommand): Promise<any> {
         const { name, referenceId, adminId } = command.body;
-        const {audience} = command.req.user
+        const { audience } = command.req.user;
         try {
             const exitSystem = await this.systemService.findSystemById(audience);
             if (!exitSystem) {
@@ -37,7 +37,7 @@ export class AddSubSystemCommandHandler implements ICommandHandler<AddSubSystemC
             await queryRunner.startTransaction();
 
             try {
-                let subSystem = new SubSystemEntity();
+                const subSystem = new SubSystemEntity();
                 subSystem.name = name;
                 subSystem.referenceId = referenceId;
                 subSystem.system = exitSystem;
@@ -50,17 +50,17 @@ export class AddSubSystemCommandHandler implements ICommandHandler<AddSubSystemC
                     sub: '',
                     section: 'subsystem',
                 };
-                const apiKey = await this.jwtService.sign(payload,  {expiresIn: '100y'},);
-                res.apiKey = apiKey
+                const apiKey = await this.jwtService.sign(payload, { expiresIn: '100y' });
+                res.apiKey = apiKey;
                 await queryRunner.manager.save(res);
 
-                let agent = new AgentsEntity();
+                const agent = new AgentsEntity();
                 agent.agentId = adminId;
                 agent.role = Role.ADMIN;
                 agent.relatedId = subSystem.id;
                 agent.relatedType = sectionTypeEnum.SUBSYSTEM;
                 await queryRunner.manager.save(agent);
-                await queryRunner.commitTransaction();  
+                await queryRunner.commitTransaction();
                 return res;
             } catch (error) {
                 await queryRunner.rollbackTransaction();

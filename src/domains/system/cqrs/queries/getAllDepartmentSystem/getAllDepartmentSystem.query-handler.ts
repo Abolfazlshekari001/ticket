@@ -1,8 +1,8 @@
-import { HttpException } from "@nestjs/common";
-import { QueryHandler, IQueryHandler } from "@nestjs/cqrs";
-import { Invalid_Input, InternalServerError, Data_NotFound } from "src/common/translates/Error.Translate";
-import { SystemService } from "src/domains/system/system.service";
-import { GetAllDepartemantSystemQuery } from "./getAllDepartmentSystem.query";
+import { HttpException } from '@nestjs/common';
+import { QueryHandler, IQueryHandler } from '@nestjs/cqrs';
+import { Invalid_Input, InternalServerError, Data_NotFound } from 'src/common/translates/Error.Translate';
+import { SystemService } from 'src/domains/system/system.service';
+import { GetAllDepartemantSystemQuery } from './getAllDepartmentSystem.query';
 
 @QueryHandler(GetAllDepartemantSystemQuery)
 export class GetAllDepartemantSystemQueryHandler implements IQueryHandler<GetAllDepartemantSystemQuery> {
@@ -16,11 +16,11 @@ export class GetAllDepartemantSystemQueryHandler implements IQueryHandler<GetAll
                 throw new HttpException(Err, Err.status_code);
             }
             const departements = await this.systemService.getAllDepartemantForSystem(system.id);
-            if(!departements){
+            if (!departements) {
                 const Err = Data_NotFound('دپارتمانی برای این سامانه ثبت نشده', 'Department is not registered for this system');
                 throw new HttpException(Err, Err.status_code);
             }
-            return departements
+            return departements;
         } catch (error) {
             if (error.status === undefined) {
                 const formatError = InternalServerError(error.message);

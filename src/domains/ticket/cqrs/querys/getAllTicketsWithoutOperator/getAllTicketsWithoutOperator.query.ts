@@ -1,7 +1,6 @@
-export class GetAllTicketsWithoutOperatorQuery{
+export class GetAllTicketsWithoutOperatorQuery {
     constructor(req: any) {
-      this.req = req;
-    }   
+        this.req = req;
+    }
     req: any;
-  }
- 
+}

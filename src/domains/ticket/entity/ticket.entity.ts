@@ -24,7 +24,7 @@ export class TicketEntity extends BaseEntity {
     id: string;
 
     @ApiProperty()
-    @Column()   
+    @Column()
     title: string;
 
     @Column({
@@ -56,7 +56,7 @@ export class TicketEntity extends BaseEntity {
     @ApiProperty()
     @Column({ nullable: true })
     name: string;
-    
+
     @ApiProperty()
     @CreateDateColumn({ nullable: true })
     createdAt: Date;
