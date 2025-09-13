@@ -19,8 +19,7 @@ export class addSystemSubmitDto {
 
     @ApiProperty()
     @IsNotEmpty()
-    adminId:string
-
+    adminId: string;
 }
 
 export class addSystemResponseDto {

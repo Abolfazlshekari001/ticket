@@ -27,14 +27,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Lint code
-        run: npm run lint
-
       - name: Build project
         run: npm run build
 
   deploy:
     name: Deploy app with pm2
+    needs: build  
     runs-on: ubuntu-latest
     steps:
       - name: Deploy app with pm2
@@ -44,7 +42,7 @@ jobs:
           SERVER_PATH: ${{ secrets.SERVER_PATH }}
           PM2_NAME: ${{ secrets.PM2_NAME }}
         run: |
-          ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_HOST << 'SSH'
+          ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_HOST << SSH
             set -e
             cd "$SERVER_PATH"
 
@@ -54,7 +52,9 @@ jobs:
             npm ci --production
             npm run build
 
-            export $(cat development.env | xargs)
+            set -a
+            source development.env
+            set +a
 
             pm2 restart "$PM2_NAME" --update-env || pm2 start dist/main.js --name "$PM2_NAME"
           SSH

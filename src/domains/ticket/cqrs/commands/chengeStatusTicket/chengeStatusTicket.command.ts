@@ -1,8 +1,8 @@
 export class ChengeStatusTicketCommand {
     constructor(req: any, ticketId: string) {
         this.req = req;
-        this.ticketId = ticketId
+        this.ticketId = ticketId;
     }
     req: any;
-    ticketId: string
+    ticketId: string;
 }

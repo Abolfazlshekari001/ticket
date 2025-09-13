@@ -8,7 +8,7 @@ import { TicketService } from 'src/domains/ticket/ticket.service';
 export class getOperatorTicketsQueryHandler implements IQueryHandler<getOperatorTicketsQuery> {
     constructor(private readonly ticketService: TicketService) {}
     async execute(query: getOperatorTicketsQuery): Promise<any> {
-        const { audience } = query.req.user
+        const { audience } = query.req.user;
         const { agentId } = query;
         try {
             const ticket = await this.ticketService.findOperatorTickets(agentId, audience);

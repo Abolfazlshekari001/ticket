@@ -29,7 +29,7 @@ export class GetAllTicketsWithoutOperatorQueryHandler implements IQueryHandler<G
                 }
             }
             const ticket = await this.ticketService.getAllTicketsWithoutOperator(audience, section);
-            return ticket
+            return ticket;
         } catch (error) {
             if (error.status === undefined) {
                 const formatError = InternalServerError(error.message);

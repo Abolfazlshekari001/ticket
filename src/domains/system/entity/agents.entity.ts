@@ -1,14 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-    Column,
-    Entity,
-    PrimaryGeneratedColumn,
-    CreateDateColumn,
-    UpdateDateColumn,
-    BaseEntity,
-    DeleteDateColumn,
-    OneToMany,
-} from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, BaseEntity, DeleteDateColumn, OneToMany } from 'typeorm';
 import { TicketEntity } from 'src/domains/ticket/entity/ticket.entity';
 import { MessageEntity } from 'src/domains/ticket/entity/message.entity';
 import { sectionTypeEnum } from './enum/sectionType.emun';

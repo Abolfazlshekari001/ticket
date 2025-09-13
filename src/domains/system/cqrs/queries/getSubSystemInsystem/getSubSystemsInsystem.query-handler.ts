@@ -16,12 +16,12 @@ export class GetSubSystemToSystemQueryHandler implements IQueryHandler<GetSubSys
                 const Err = Invalid_Input('این سامانه موجود نیست', 'this  system not exist');
                 throw new HttpException(Err, Err.status_code);
             }
-            const subSystems = await this.systemService.findSubSystemForSystemByRefrenceId(referenceId,system.id)
-            if(!subSystems){
+            const subSystems = await this.systemService.findSubSystemForSystemByRefrenceId(referenceId, system.id);
+            if (!subSystems) {
                 const Err = Invalid_Input('این  زیرسامانه موجود نیست', 'this  subSystem not exist');
                 throw new HttpException(Err, Err.status_code);
             }
-            return subSystems
+            return subSystems;
         } catch (error) {
             if (error.status === undefined) {
                 const formatError = InternalServerError(error.message);

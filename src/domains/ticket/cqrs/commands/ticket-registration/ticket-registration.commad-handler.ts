@@ -21,7 +21,7 @@ export class TicketRegistrationCommandHandler implements ICommandHandler<TicketR
         private readonly connection: Connection,
     ) {}
     async execute(command: TicketRegistrationCommand): Promise<any> {
-        const { departmentId, priorirty, title, body, userId, relatedSection,name } = command.body;
+        const { departmentId, priorirty, title, body, userId, relatedSection, name } = command.body;
         const { file } = command;
         const { audience, section } = command.req.user;
         const { FILE_SERVER_USERNAME, SREVICE_TYPE, FILE_SERVER_URL } = process.env;
@@ -61,7 +61,7 @@ export class TicketRegistrationCommandHandler implements ICommandHandler<TicketR
                     newMessage.body = body;
                     newMessage.senderId = userId;
                     newMessage.senderType = SenderType.USER;
-                    let resMessage = await queryRunner.manager.save(newMessage);
+                    const resMessage = await queryRunner.manager.save(newMessage);
 
                     let fileUrl = null;
                     if (file.length !== 0) {
@@ -69,11 +69,11 @@ export class TicketRegistrationCommandHandler implements ICommandHandler<TicketR
                         const fileToUpload = Array.isArray(file) ? file[0] : file;
                         formData.append('files', fileToUpload.buffer, {
                             filename: fileToUpload.originalname,
-                            contentType: 'image/png', 
+                            contentType: 'image/png',
                         });
                         formData.append('systemName', FILE_SERVER_USERNAME);
                         formData.append('sreviceType', SREVICE_TYPE);
-                    
+
                         const response = await axios.post(`${FILE_SERVER_URL}/fileSystem/upload`, formData, {
                             headers: { ...formData.getHeaders() },
                         });
@@ -132,7 +132,7 @@ export class TicketRegistrationCommandHandler implements ICommandHandler<TicketR
                 newMessage.body = body;
                 newMessage.senderId = userId;
                 newMessage.senderType = SenderType.USER;
-                let resMessage = await queryRunner.manager.save(newMessage);
+                const resMessage = await queryRunner.manager.save(newMessage);
 
                 let fileUrl = null;
                 if (file.length !== 0) {
@@ -140,11 +140,11 @@ export class TicketRegistrationCommandHandler implements ICommandHandler<TicketR
                     const fileToUpload = Array.isArray(file) ? file[0] : file;
                     formData.append('files', fileToUpload.buffer, {
                         filename: fileToUpload.originalname,
-                        contentType: 'image/png', 
+                        contentType: 'image/png',
                     });
                     formData.append('systemName', FILE_SERVER_USERNAME);
                     formData.append('sreviceType', SREVICE_TYPE);
-                
+
                     const response = await axios.post(`${FILE_SERVER_URL}/fileSystem/upload`, formData, {
                         headers: { ...formData.getHeaders() },
                     });

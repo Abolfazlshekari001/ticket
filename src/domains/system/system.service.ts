@@ -19,7 +19,7 @@ export class SystemService {
         private readonly agentRepository: Repository<AgentsEntity>,
         @InjectRepository(DepartmentEntity)
         private readonly departmentRepository: Repository<DepartmentEntity>,
-    ) { }
+    ) {}
 
     async findSystem(systemId: string) {
         try {
@@ -282,5 +282,4 @@ export class SystemService {
             } else throw error;
         }
     }
-
 }

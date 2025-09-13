@@ -13,7 +13,7 @@ import { Role } from 'src/domains/system/entity/enum/agent-role.enum';
 export class AddOperatorCommandHandler implements ICommandHandler<AddOperatorCommand> {
     constructor(private readonly systemService: SystemService) {}
     async execute(command: AddOperatorCommand): Promise<any> {
-        const { operatorId, operatorName} = command.body;
+        const { operatorId, operatorName } = command.body;
         const { audience, section } = command.req.user;
         try {
             let owner: SystemEntity | SubSystemEntity;

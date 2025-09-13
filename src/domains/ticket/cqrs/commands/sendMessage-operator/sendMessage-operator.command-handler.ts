@@ -77,7 +77,7 @@ export class SendMessageOperatorCommandHanler implements ICommandHandler<SendMes
                         ...formData.getHeaders(),
                     },
                 });
-                let index_image_url = [];
+                const index_image_url = [];
                 if (response.data.success) {
                     for (const imageUrl of response.data.result) {
                         index_image_url.push(imageUrl.fromRemotePath);
