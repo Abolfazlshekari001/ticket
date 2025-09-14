@@ -1,22 +1,171 @@
-name: Simple Deploy
+name: Deploy to develop
 
 on:
-    push:
-        branches: [develop]
+  push:
+    branches: [ develop ]
+  pull_request:
+    branches: [ develop ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
-    deploy:
-        runs-on: ubuntu-latest
-        steps:
-            - name: Deploy to server
-              uses: appleboy/ssh-action@v0.1.7
-              with:
-                  host: ${{ secrets.SERVER_HOST }}
-                  username: ${{ secrets.SERVER_USER }}
-                  key: ${{ secrets.SSH_PRIVATE_KEY }}
-                  script: |
-                      cd ${{ secrets.SERVER_PATH }}
-                      git pull origin develop
-                      npm ci
-                      npm run build
-                      pm2 restart ${{ secrets.PM2_NAME }} || pm2 start dist/main.js --name ${{ secrets.PM2_NAME }}
+  build:
+    name: Build & Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build project
+        run: npm run build
+
+  deploy:
+    name: Deploy app with pm2
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.7.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Add server to known hosts
+        env:
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H $SERVER_HOST >> ~/.ssh/known_hosts
+
+      - name: Test SSH Connection
+        env:
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+        run: |
+          echo "Testing SSH connection..."
+          ssh -o ConnectTimeout=10 -o BatchMode=yes $SERVER_USER@$SERVER_HOST 'echo "SSH connection successful - User: $(whoami), Host: $(hostname)"'
+
+      - name: Deploy app with pm2
+        env:
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          SERVER_PATH: ${{ secrets.SERVER_PATH }}
+          PM2_NAME: ${{ secrets.PM2_NAME }}
+        run: |
+          ssh $SERVER_USER@$SERVER_HOST << EOF
+            set -e
+            echo "Starting deployment process..."
+            
+            # Define variables explicitly
+            SERVER_PATH="${{ secrets.SERVER_PATH }}"
+            PM2_NAME="${{ secrets.PM2_NAME }}"
+            
+            echo "Navigating to: \$SERVER_PATH"
+            cd "\$SERVER_PATH"
+            echo "Current directory: \$(pwd)"
+            
+            # Setup NVM environment
+            export NVM_DIR="\$HOME/.nvm"
+            [ -s "\$NVM_DIR/nvm.sh" ] && source "\$NVM_DIR/nvm.sh"
+            
+            # Set specific paths based on your server setup
+            NODE_PATH="/root/.nvm/versions/node/v18.20.4/bin/node"
+            NPM_PATH="/root/.nvm/versions/node/v18.20.4/bin/npm"
+            PM2_PATH="/root/.nvm/versions/node/v18.20.4/bin/pm2"
+            
+            # Verify tools exist
+            if [ ! -f "\$NODE_PATH" ]; then
+              echo "Error: Node.js not found at \$NODE_PATH"
+              # Fallback search
+              NODE_PATH=\$(find \$HOME/.nvm -name "node" -type f 2>/dev/null | head -1)
+              echo "Fallback Node.js path: \$NODE_PATH"
+            fi
+            
+            if [ ! -f "\$NPM_PATH" ]; then
+              echo "Error: npm not found at \$NPM_PATH"
+              NPM_PATH=\$(find \$HOME/.nvm -name "npm" -type f 2>/dev/null | head -1)
+              echo "Fallback npm path: \$NPM_PATH"
+            fi
+            
+            echo "Using Node.js: \$NODE_PATH"
+            echo "Using npm: \$NPM_PATH"
+            echo "Node.js version: \$(\$NODE_PATH --version)"
+            echo "NPM version: \$(\$NPM_PATH --version)"
+            
+            # Verify it's a git repository
+            if [ ! -d ".git" ]; then
+              echo "Error: Not a git repository in \$(pwd)"
+              ls -la
+              exit 1
+            fi
+
+            echo "Fetching latest changes..."
+            git fetch --all
+            git reset --hard origin/develop
+            git status
+
+            echo "Installing dependencies (including devDependencies for build)..."
+            \$NPM_PATH ci
+            
+            echo "Building project..."
+            NODE_ENV=development \$NPM_PATH run build
+
+            echo "Removing devDependencies after build..."
+            \$NPM_PATH prune --production
+
+            echo "Loading environment variables..."
+            if [ -f "development.env" ]; then
+              set -a
+              source development.env
+              set +a
+              echo "Environment variables loaded from development.env"
+            else
+              echo "Warning: development.env file not found in \$(pwd)"
+              ls -la *.env 2>/dev/null || echo "No .env files found"
+            fi
+
+            echo "Managing PM2 application..."
+            
+            # Check PM2 path
+            if [ ! -f "\$PM2_PATH" ]; then
+              echo "PM2 not found at \$PM2_PATH, searching..."
+              PM2_PATH=\$(find \$HOME/.nvm -name "pm2" -type f 2>/dev/null | head -1)
+              if [ -z "\$PM2_PATH" ]; then
+                echo "Installing PM2..."
+                \$NPM_PATH install -g pm2
+                PM2_PATH=\$(find \$HOME/.nvm -name "pm2" -type f 2>/dev/null | head -1)
+              fi
+            fi
+            
+            echo "Using PM2: \$PM2_PATH"
+            
+            # Check if PM2 process exists
+            if \$PM2_PATH describe "\$PM2_NAME" > /dev/null 2>&1; then
+              echo "Restarting existing PM2 process: \$PM2_NAME"
+              \$PM2_PATH restart "\$PM2_NAME" --update-env
+            else
+              echo "Starting new PM2 process: \$PM2_NAME"
+              if [ -f "development.env" ]; then
+                \$PM2_PATH start dist/main.js --name "\$PM2_NAME" --env-file development.env
+              else
+                \$PM2_PATH start dist/main.js --name "\$PM2_NAME"
+              fi
+            fi
+            
+            echo "Deployment completed successfully!"
+            echo "PM2 Status:"
+            \$PM2_PATH status
+          EOF

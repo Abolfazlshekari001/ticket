@@ -11,7 +11,7 @@ export class sendMessageOperatorSubmitDto {
     @IsNotEmpty()
     operatorId: string;
 
-    @ApiProperty()
+   // @ApiProperty()
     @IsNotEmpty()
     @IsUUID()
     ticketId: string;
