@@ -117,11 +117,14 @@ jobs:
             git reset --hard origin/develop
             git status
 
-            echo "Installing dependencies..."
-            \$NPM_PATH ci --production
+            echo "Installing dependencies (including devDependencies for build)..."
+            \$NPM_PATH ci
             
             echo "Building project..."
-            \$NPM_PATH run build
+            NODE_ENV=development \$NPM_PATH run build
+
+            echo "Removing devDependencies after build..."
+            \$NPM_PATH prune --production
 
             echo "Loading environment variables..."
             if [ -f "development.env" ]; then
