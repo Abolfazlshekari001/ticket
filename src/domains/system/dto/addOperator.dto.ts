@@ -6,7 +6,7 @@ export class addoperatorSubmitDto {
     @IsString()
     operatorId: string;
 
-    @ApiProperty()
+   // @ApiProperty()
     @IsString()
     operatorName: string;
 }
